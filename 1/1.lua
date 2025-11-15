@@ -325,39 +325,71 @@ UIS.InputChanged:Connect(function(input)
 	end
 end)
 
--- ===== NOCLIP =====
+-- ===== NOCLIP (FIXED & STABLE) =====
+
+-- force collision state
 local function setCollision(char, state)
 	for _, part in ipairs(char:GetDescendants()) do
-		if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+		if part:IsA("BasePart") then
 			part.CanCollide = state
 		end
 	end
 end
 
+-- connection holder
+local noclipConn = nil
+
+-- noclip ON
 local function startNoclip()
-	if noclipConn then noclipConn:Disconnect() end
+	-- clean old connections to avoid double-running
+	if noclipConn then
+		noclipConn:Disconnect()
+		noclipConn = nil
+	end
+
 	noclipConn = RS.Stepped:Connect(function()
 		local c = plr.Character
-		if c then setCollision(c, false) end
+		if c then
+			setCollision(c, false)
+		end
 	end)
 end
 
+-- noclip OFF
 local function stopNoclip()
-	if noclipConn then noclipConn:Disconnect() end
-	noclipConn = nil
+	if noclipConn then
+		noclipConn:Disconnect()
+		noclipConn = nil
+	end
+
 	local c = plr.Character
-	if c then setCollision(c, true) end
+	if c then
+		setCollision(c, true)
+	end
 end
 
+-- button toggle
 noclipBtn.MouseButton1Click:Connect(function()
 	noclipEnabled = not noclipEnabled
 	noclipBtn.Text = noclipEnabled and "Noclip ON" or "Noclip"
+
 	if noclipEnabled then
 		startNoclip()
 	else
 		stopNoclip()
 	end
 end)
+
+-- persist after respawn
+plr.CharacterAdded:Connect(function(char)
+	if noclipEnabled then
+		-- wait for character to fully load
+		char:WaitForChild("HumanoidRootPart")
+		task.wait(0.1)
+		startNoclip()
+	end
+end)
+
 
 -- ===== FLY =====
 flyBtn.MouseButton1Click:Connect(function()
@@ -509,15 +541,20 @@ Players.PlayerAdded:Connect(refreshSpectate)
 Players.PlayerRemoving:Connect(refreshSpectate)
 refreshSpectate()
 
--- ===== STOP SPECTATE ON BACKSPACE =====
+-- ===== STOP SPECTATE ON BACKSPACE (FIXED) =====
 UIS.InputBegan:Connect(function(input, gpe)
+	-- Prevent GUI from blocking Backspace
+	if gpe then return end
+
 	if input.KeyCode == Enum.KeyCode.Backspace then
 		if spectating then
 			spectating = false
 			spectateTarget = nil
+			cam.CameraType = Enum.CameraType.Custom
 		end
 	end
 end)
+
 
 -- ===== CAMERA FOLLOW ENGINE =====
 RS.RenderStepped:Connect(function()
