@@ -1,30 +1,75 @@
---=== TKOT KEY CHECK ===--
+--====== TK1 GUI KEY SYSTEM (Self-Delete Version) ======--
 
-local REQUIRED_KEY = "TKOT"  -- your exact key (capital letters, no spaces)
+local REQUIRED_KEY = "TK1"
+local CoreGui = game:GetService("CoreGui")
 
--- ask user for input
-local input = game:GetService("StarterGui"):PromptInputAsync{
-    Title = "TKOT Key Required",
-    Text = "Enter Key:",
-    PlaceholderText = "TKOT",
-    Password = true
-}
+-- Create Key Screen
+local keyGui = Instance.new("ScreenGui")
+keyGui.ResetOnSpawn = false
+keyGui.Parent = CoreGui
 
-if not input or input ~= REQUIRED_KEY then
-    -- Wrong key OR no key entered
-    print("Invalid TKOT key. Script terminated.")
+local frame = Instance.new("Frame", keyGui)
+frame.Size = UDim2.new(0, 250, 0, 150)
+frame.Position = UDim2.new(0.5, -125, 0.5, -75)
+frame.BackgroundColor3 = Color3.fromRGB(60, 0, 90)
+frame.BorderSizePixel = 0
 
-    -- SELF-DELETE (clears the script from memory)
-    for i = 1, 200 do
+local title = Instance.new("TextLabel", frame)
+title.Size = UDim2.new(1,0,0,30)
+title.BackgroundColor3 = Color3.fromRGB(80, 0, 120)
+title.Text = "Key Required"
+title.Font = Enum.Font.SourceSansBold
+title.TextColor3 = Color3.fromRGB(255,255,255)
+title.TextSize = 20
+
+local box = Instance.new("TextBox", frame)
+box.Size = UDim2.new(1, -20, 0, 40)
+box.Position = UDim2.new(0, 10, 0, 45)
+box.BackgroundColor3 = Color3.fromRGB(40, 0, 60)
+box.PlaceholderText = "Enter Key"
+box.Font = Enum.Font.SourceSansBold
+box.TextColor3 = Color3.fromRGB(255,255,255)
+box.TextSize = 18
+
+local submit = Instance.new("TextButton", frame)
+submit.Size = UDim2.new(1, -20, 0, 35)
+submit.Position = UDim2.new(0, 10, 0, 100)
+submit.BackgroundColor3 = Color3.fromRGB(120, 0, 180)
+submit.Font = Enum.Font.SourceSansBold
+submit.TextColor3 = Color3.fromRGB(255,255,255)
+submit.Text = "UNLOCK"
+submit.TextSize = 20
+
+local unlocked = false
+
+local function selfDelete()
+    warn("INVALID KEY — script self-deleted.")
+
+    pcall(function() keyGui:Destroy() end)
+
+    for i = 1, 50 do
         pcall(function()
             script:Destroy()
         end)
     end
 
-    return  -- stop execution immediately
+    return
 end
 
-print("TKOT Key Accepted. Loading...")
+submit.MouseButton1Click:Connect(function()
+	if box.Text == REQUIRED_KEY then
+		unlocked = true
+		keyGui:Destroy()
+	else
+		-- WRONG KEY
+		selfDelete()
+	end
+end)
+
+-- Freeze script until unlocked or destroyed
+repeat task.wait() until unlocked == true
+
+print("TK1 Key Accepted — Loading Script...")
 
 -- SERVICES
 local Players = game:GetService("Players")
