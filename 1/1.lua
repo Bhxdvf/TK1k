@@ -84,7 +84,7 @@ end
 
 -- Main Frame
 local frame = Instance.new("Frame", screenGui)
-frame.Size = UDim2.new(0, 460, 0, 300)
+frame.Size = UDim2.new(0, 420, 0, 280)
 frame.Position = UDim2.new(0.3, 0, 0.2, 0)
 frame.BackgroundColor3 = PURPLE_DARK_1
 frame.Active, frame.Draggable = true, true
