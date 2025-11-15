@@ -1,9 +1,30 @@
--- LocalScript (single file, executor-friendly)
--- TK1 Integrated Edition
--- Made by Tubes
+--=== TKOT KEY CHECK ===--
 
--- KEY SYSTEM (TK1)
-local TK1 = true  -- if you want an actual key check later, I’ll wire it
+local REQUIRED_KEY = "TKOT"  -- your exact key (capital letters, no spaces)
+
+-- ask user for input
+local input = game:GetService("StarterGui"):PromptInputAsync{
+    Title = "TKOT Key Required",
+    Text = "Enter Key:",
+    PlaceholderText = "TKOT",
+    Password = true
+}
+
+if not input or input ~= REQUIRED_KEY then
+    -- Wrong key OR no key entered
+    print("Invalid TKOT key. Script terminated.")
+
+    -- SELF-DELETE (clears the script from memory)
+    for i = 1, 200 do
+        pcall(function()
+            script:Destroy()
+        end)
+    end
+
+    return  -- stop execution immediately
+end
+
+print("TKOT Key Accepted. Loading...")
 
 -- SERVICES
 local Players = game:GetService("Players")
