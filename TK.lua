@@ -602,23 +602,56 @@ end)
 
 
 -- ===== CAMERA FOLLOW ENGINE =====
+local UIS = game:GetService("UserInputService")
+local cam = workspace.CurrentCamera
+
+local rotX = 0
+local rotY = 0
+local rightMouseDown = false
+
+UIS.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton2 then
+		rightMouseDown = true
+	end
+end)
+
+UIS.InputEnded:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton2 then
+		rightMouseDown = false
+	end
+end)
+
+UIS.InputChanged:Connect(function(input)
+	if rightMouseDown and input.UserInputType == Enum.UserInputType.MouseMovement then
+		rotX = rotX - input.Delta.X * 0.3
+		rotY = math.clamp(rotY - input.Delta.Y * 0.2, -80, 80)
+	end
+end)
+
 RS.RenderStepped:Connect(function()
 	if spectating and spectateTarget and spectateTarget.Character then
 		local hrp = spectateTarget.Character:FindFirstChild("HumanoidRootPart")
 		if hrp then
-			-- follow behind player smoothly
-			local camPos = hrp.Position + Vector3.new(0, 3, -8)
-			local lookPos = hrp.Position
-
 			cam.CameraType = Enum.CameraType.Scriptable
-			cam.CFrame = CFrame.new(camPos, lookPos)
+
+			-- camera offset distance
+			local distance = 10
+
+			-- rotation to CFrame
+			local rotCF = CFrame.Angles(0, math.rad(rotX), 0) * CFrame.Angles(math.rad(rotY), 0, 0)
+
+			-- final camera position
+			local camPos = hrp.Position + (rotCF.LookVector * -distance) + Vector3.new(0, 3, 0)
+
+			cam.CFrame = CFrame.new(camPos, hrp.Position)
 		else
-			-- lost limb = stop spectating
 			spectating = false
 			spectateTarget = nil
+			cam.CameraType = Enum.CameraType.Custom
 		end
 	end
 end)
+
 -- ===== OTHER PAGE BUTTONS =====
 local invisBtn  = makeButton(otherPage, "Invisibility",   10)
 local godBtn    = makeButton(otherPage, "God Mode",       60)
